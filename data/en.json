@@ -237,7 +237,10 @@
 		"Transfer Success": "Transfer Success",
 		"Transfer Receipt": "Transfer Receipt",
 		"Statement Request": "Statement Request",
-		"Terms of Use": "Terms of Use"
+		"Terms of Use": "Terms of Use",
+		"Account": "Account",
+		"Request Card": "Request Card",
+		"Control Panel": "Control Panel"
 	},
 	"screenshotCategories": {
 		"onboarding": "Onboarding",
