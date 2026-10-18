@@ -2,12 +2,13 @@ import type { JSX } from "react";
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Contributors } from "./components/Contributors";
 import { DetailPanel } from "./components/DetailPanel";
 import { Navbar } from "./components/Navbar";
 import { SearchDialog } from "./components/SearchDialog";
 import { Toaster } from "./components/Toaster";
+import { BANKS, PAYMENT_GATEWAYS, PAYMENT_METHODS } from "./constants";
 import { useScrollSound } from "./hooks/useScrollSound";
 import { useUIContext } from "./hooks/useUIContext";
 import { AboutPage } from "./pages/AboutPage";
@@ -30,17 +31,13 @@ export const UIContext = createContext<UIContextType | null>(null);
 // Matches --background values from index.css for each theme (used by fallback animation)
 const THEME_BG: Record<Theme, string> = { dark: "#080808", light: "#ffffff" };
 
+const LOGOS = [...BANKS, ...PAYMENT_METHODS, ...PAYMENT_GATEWAYS];
+
 function Layout({ children }: { children: React.ReactNode }): JSX.Element {
-	const { closeSidebar, isSidebarOpen } = useUIContext();
-	const { pathname } = useLocation();
+	const { isSidebarOpen } = useUIContext();
 	const { t } = useTranslation();
 
 	useScrollSound();
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: pathname triggers closeSidebar on route change
-	useEffect(() => {
-		closeSidebar();
-	}, [pathname, closeSidebar]);
 
 	return (
 		<div className="min-h-screen bg-background text-primary">
@@ -134,7 +131,14 @@ function ScrollToTop(): null {
 }
 
 function App(): JSX.Element {
-	const [selectedItem, setSelectedItemState] = useState<SelectedItem>(null);
+	const location = useLocation();
+	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const logoId = searchParams.get("logo");
+	const selectedItem = useMemo<SelectedItem>(
+		() => LOGOS.find((item) => item.id === logoId) ?? null,
+		[logoId],
+	);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [colorMode, setColorMode] = useState<ColorMode>("colored");
 	const [logoStyle, setLogoStyle] = useState<LogoStyle>("branded");
@@ -160,13 +164,39 @@ function App(): JSX.Element {
 
 	const isSidebarOpen = !!selectedItem;
 
-	const setSelectedItem = useCallback((item: SelectedItem) => {
-		setSelectedItemState(item);
-	}, []);
+	const closingLocation = useRef<unknown>(null);
 
 	const closeSidebar = useCallback(() => {
-		setSelectedItemState(null);
-	}, []);
+		if (location.state?.closeWithBack) {
+			if (closingLocation.current !== location) navigate(-1);
+			closingLocation.current = location;
+			return;
+		}
+		setSearchParams(
+			(params) => {
+				params.delete("logo");
+				return params;
+			},
+			{ replace: true },
+		);
+	}, [location, navigate, setSearchParams]);
+
+	const setSelectedItem = useCallback(
+		(item: SelectedItem) => {
+			if (!item) {
+				closeSidebar();
+				return;
+			}
+			const onGrid = location.pathname === "/";
+			navigate(
+				{ pathname: "/", search: `?logo=${item.id}` },
+				onGrid && isSidebarOpen
+					? { replace: true, state: location.state }
+					: { state: { closeWithBack: onGrid } },
+			);
+		},
+		[closeSidebar, isSidebarOpen, location, navigate],
+	);
 
 	const openSearch = useCallback(() => {
 		setIsSearchOpen(true);
@@ -378,18 +408,16 @@ function App(): JSX.Element {
 
 	return (
 		<UIContext.Provider value={contextValue}>
-			<BrowserRouter>
-				<ScrollToTop />
-				<Layout>
-					<Routes>
-						<Route path="/" element={<HomePage />} />
-						<Route path="/apps" element={<AppsPage />} />
-						<Route path="/apps/:bankId" element={<AppDetailPage />} />
-						<Route path="/contributing" element={<ContributingPage />} />
-						<Route path="/about" element={<AboutPage />} />
-					</Routes>
-				</Layout>
-			</BrowserRouter>
+			<ScrollToTop />
+			<Layout>
+				<Routes>
+					<Route path="/" element={<HomePage />} />
+					<Route path="/apps" element={<AppsPage />} />
+					<Route path="/apps/:bankId" element={<AppDetailPage />} />
+					<Route path="/contributing" element={<ContributingPage />} />
+					<Route path="/about" element={<AboutPage />} />
+				</Routes>
+			</Layout>
 		</UIContext.Provider>
 	);
 }
