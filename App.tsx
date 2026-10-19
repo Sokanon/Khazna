@@ -9,6 +9,7 @@ import { DetailPanel } from "./components/DetailPanel";
 import { InstallBanner, InstallSheet } from "./components/InstallPrompt";
 import { Navbar } from "./components/Navbar";
 import { SearchDialog } from "./components/SearchDialog";
+import { TabBar } from "./components/TabBar";
 import { Toaster } from "./components/Toaster";
 import { UpdateBar } from "./components/UpdateBar";
 import { usePwa } from "./hooks/usePwa";
@@ -20,6 +21,7 @@ import { AppDetailPage } from "./pages/AppDetailPage";
 import { AppsPage } from "./pages/AppsPage";
 import { ContributingPage } from "./pages/ContributingPage";
 import { HomePage } from "./pages/HomePage";
+import { SettingsPage } from "./pages/SettingsPage";
 import type {
 	BaseEntity,
 	ColorMode,
@@ -49,7 +51,7 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 	}, [pathname, closeSidebar]);
 
 	return (
-		<div className="min-h-screen bg-background text-primary">
+		<div className="min-h-screen bg-background text-primary pb-[var(--tab-bar-h,0px)]">
 			<Navbar />
 			<div
 				className={`relative transition-[padding] duration-300 flex-1 flex flex-col ${isSidebarOpen ? "xl:pe-[400px]" : ""}`}
@@ -132,6 +134,7 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 			<InstallBanner />
 			<InstallSheet />
 			<UpdateBar />
+			<TabBar />
 			<Toaster />
 		</div>
 	);
@@ -415,6 +418,7 @@ function App(): JSX.Element {
 						<Route path="/apps/:bankId" element={<AppDetailPage />} />
 						<Route path="/contributing" element={<ContributingPage />} />
 						<Route path="/about" element={<AboutPage />} />
+						<Route path="/settings" element={<SettingsPage />} />
 					</Routes>
 				</Layout>
 			</BrowserRouter>

@@ -20,7 +20,7 @@ export function UpdateBar(): JSX.Element | null {
 	return (
 		<div
 			role="status"
-			className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[45] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-border bg-background/95 p-3 ps-4 shadow-2xl shadow-black/20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-6 duration-300"
+			className="fixed inset-x-3 bottom-[calc(0.75rem+var(--tab-bar-h,0px)+env(safe-area-inset-bottom))] z-[45] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-border bg-background/95 p-3 ps-4 shadow-2xl shadow-black/20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-6 duration-300"
 		>
 			<RefreshCw
 				size={18}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { BANKS, PAYMENT_GATEWAYS, PAYMENT_METHODS } from "../constants";
+import { useBackToClose } from "../hooks/useBackToClose";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
 import i18n from "../i18n";
@@ -70,6 +71,7 @@ export function SearchDialog(): JSX.Element | null {
 	const { closeSearch, getLogoUrl, isSearchOpen, openSearch, setSelectedItem } = useUIContext();
 	const [query, setQuery] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
+	const dismiss = useBackToClose(isSearchOpen, closeSearch);
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent): void {
@@ -84,13 +86,13 @@ export function SearchDialog(): JSX.Element | null {
 
 			if (event.key === "Escape" && isSearchOpen) {
 				event.preventDefault();
-				closeSearch();
+				dismiss();
 			}
 		}
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [closeSearch, isSearchOpen, openSearch, play]);
+	}, [dismiss, isSearchOpen, openSearch, play]);
 
 	useEffect(() => {
 		if (!isSearchOpen) {
@@ -114,7 +116,7 @@ export function SearchDialog(): JSX.Element | null {
 
 	function handleClose(): void {
 		play("tap");
-		closeSearch();
+		dismiss();
 	}
 
 	function handleChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -124,17 +126,17 @@ export function SearchDialog(): JSX.Element | null {
 
 	function handleSelect(result: SearchResult): void {
 		play("select");
-		closeSearch();
+		dismiss(() => {
+			if (result.kind === "app") {
+				navigate(`/apps/${result.item.id}`);
+				return;
+			}
 
-		if (result.kind === "app") {
-			navigate(`/apps/${result.item.id}`);
-			return;
-		}
-
-		navigate("/");
-		window.setTimeout(() => {
-			setSelectedItem(result.item);
-		}, 0);
+			navigate("/");
+			window.setTimeout(() => {
+				setSelectedItem(result.item);
+			}, 0);
+		});
 	}
 
 	if (!isSearchOpen) return null;
@@ -215,7 +217,8 @@ export function SearchDialog(): JSX.Element | null {
 					)}
 				</div>
 
-				<div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
+				{/* Keyboard shortcuts mean nothing on a touch screen */}
+				<div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground pointer-coarse:hidden">
 					<span>{t("search.shortcutHint")}</span>
 					<kbd className="rounded border border-border-subtle bg-surface px-1.5 py-0.5 font-semibold">
 						Esc

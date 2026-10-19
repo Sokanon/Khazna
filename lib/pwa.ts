@@ -188,6 +188,24 @@ function lookForUpdate(): void {
 	registration.update().catch(() => {});
 }
 
+/** "Check for updates" in Settings: asks for a new version now and waits for it to arrive. */
+export async function checkForUpdate(): Promise<"ready" | "current" | "unavailable"> {
+	if (state.updateReady) return "ready";
+	if (!registration || !navigator.onLine) return "unavailable";
+	try {
+		await registration.update();
+	} catch {
+		return "unavailable";
+	}
+	lookedAt = Date.now();
+	// A new version installs in the background, then reports itself through offerUpdate.
+	for (let waited = 0; waited < 8000 && registration.installing; waited += 250) {
+		await new Promise((resolve) => window.setTimeout(resolve, 250));
+	}
+	await new Promise((resolve) => window.setTimeout(resolve, 250));
+	return state.updateReady ? "ready" : "current";
+}
+
 function registerServiceWorker(): void {
 	// Built assets only: a worker from the dev server would outlive it on localhost.
 	if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
@@ -220,6 +238,16 @@ export function startPwa(): void {
 	syncStandalone();
 	// Installing from a desktop tab moves that tab into the app window without a reload.
 	standaloneQuery.addEventListener?.("change", syncStandalone);
+
+	// The launch animation (index.html) leaves the page once it has played, or straight away
+	// when there's nothing to play.
+	const splash = document.getElementById("splash");
+	if (splash && !document.documentElement.classList.contains("splash")) splash.remove();
+	splash?.addEventListener("animationend", (event) => {
+		if (event.target !== splash) return;
+		splash.remove();
+		document.documentElement.classList.remove("splash");
+	});
 
 	window.addEventListener("beforeinstallprompt", (event) => {
 		event.preventDefault();

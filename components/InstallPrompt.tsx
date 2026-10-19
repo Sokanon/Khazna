@@ -3,6 +3,7 @@ import type { JSX, ReactNode } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+import { useBackToClose } from "../hooks/useBackToClose";
 import { usePwa } from "../hooks/usePwa";
 import { useSound } from "../hooks/useSound";
 import { useSwipe } from "../hooks/useSwipe";
@@ -198,13 +199,17 @@ export function InstallSheet(): JSX.Element | null {
 	const [leaving, setLeaving] = useState(false);
 	const open = installSheetOpen && !standalone;
 
-	function close(): void {
+	function slideAway(): void {
 		setLeaving(true);
 		window.setTimeout(() => {
 			setLeaving(false);
 			closeInstallSheet();
 		}, 200);
 	}
+
+	// Back (Android, browser) closes the sheet too, with the same slide.
+	const dismiss = useBackToClose(open, slideAway);
+	const close = (): void => dismiss();
 
 	const swipe = useSwipe({
 		axis: "y",
@@ -228,7 +233,7 @@ export function InstallSheet(): JSX.Element | null {
 		function onKeyDown(event: KeyboardEvent): void {
 			if (event.key === "Escape") {
 				event.preventDefault();
-				closeInstallSheet();
+				dismiss();
 				return;
 			}
 			if (event.key !== "Tab" || !panel) return;
@@ -250,7 +255,7 @@ export function InstallSheet(): JSX.Element | null {
 			root.style.overflow = overflow;
 			opener?.focus();
 		};
-	}, [open]);
+	}, [open, dismiss]);
 
 	if (!open) return null;
 

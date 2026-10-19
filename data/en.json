@@ -294,5 +294,26 @@
 		"online": "Back online",
 		"fileReady": "Your file is ready",
 		"save": "Save"
+	},
+	"tabs": {
+		"label": "Main navigation",
+		"apps": "App UI",
+		"settings": "Settings"
+	},
+	"settings": {
+		"tagline": "Libyan bank and payment brand assets",
+		"preferences": "Preferences",
+		"darkMode": "Dark mode",
+		"language": "Language",
+		"sounds": "Sounds",
+		"khazna": "Khazna",
+		"figma": "Figma library",
+		"share": "Share Khazna",
+		"app": "App",
+		"updates": "Updates",
+		"check": "Check",
+		"checking": "Checking",
+		"upToDate": "Up to date",
+		"tryLater": "Try again later"
 	}
 }

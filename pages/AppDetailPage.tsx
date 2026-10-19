@@ -17,6 +17,7 @@ import { saveFile } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { FigmaLink } from "../components/FigmaLink";
 import { BANKS, MOCK_SCREENSHOTS } from "../constants";
+import { useBackToClose } from "../hooks/useBackToClose";
 import { useLanguage } from "../hooks/useLanguage";
 import { useSound } from "../hooks/useSound";
 import { useSwipe } from "../hooks/useSwipe";
@@ -53,12 +54,13 @@ export function AppDetailPage(): JSX.Element {
 	);
 
 	const { isRTL } = useLanguage();
+	const closeViewer = useBackToClose(!!selectedScreen, () => setSelectedScreen(null));
 	const swipe = useSwipe({
 		axis: "both",
 		onSwipe: (direction) => {
 			if (direction === "down") {
 				play("select");
-				setSelectedScreen(null);
+				closeViewer();
 			} else if (direction !== "up") {
 				// Arabic reads right to left, so the next screen comes in from the left.
 				navigateLightbox(direction === (isRTL ? "right" : "left") ? "next" : "prev");
@@ -71,7 +73,7 @@ export function AppDetailPage(): JSX.Element {
 
 		function handleKeyDown(e: KeyboardEvent): void {
 			if (e.key === "Escape") {
-				setSelectedScreen(null);
+				closeViewer();
 			} else if (e.key === "ArrowRight") {
 				navigateLightbox("next");
 			} else if (e.key === "ArrowLeft") {
@@ -81,7 +83,7 @@ export function AppDetailPage(): JSX.Element {
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [selectedScreen, navigateLightbox]);
+	}, [selectedScreen, navigateLightbox, closeViewer]);
 
 	const handleDownloadSingle = useCallback(
 		async (screen: Screenshot) => {
@@ -259,7 +261,7 @@ export function AppDetailPage(): JSX.Element {
 					className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200 touch-pinch-zoom"
 					onClick={() => {
 						play("select");
-						setSelectedScreen(null);
+						closeViewer();
 					}}
 					{...swipe.handlers}
 				>
@@ -290,7 +292,7 @@ export function AppDetailPage(): JSX.Element {
 						onClick={(e) => {
 							e.stopPropagation();
 							play("select");
-							setSelectedScreen(null);
+							closeViewer();
 						}}
 						className="absolute top-4 end-4 p-2 text-zinc-400 hover:text-white bg-zinc-800/50 hover:bg-zinc-800 rounded-full transition-colors z-50"
 					>

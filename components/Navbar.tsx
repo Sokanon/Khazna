@@ -21,6 +21,7 @@ import { usePwa } from "../hooks/usePwa";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
 import { canInstall, startInstall } from "../lib/pwa";
+import { cn } from "../lib/utils";
 import { SoundToggle } from "./SoundToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -31,7 +32,8 @@ export function Navbar(): JSX.Element {
 	const location = useLocation();
 	const contribute = useContribute();
 	const { openSearch } = useUIContext();
-	const showInstall = canInstall(usePwa());
+	const pwa = usePwa();
+	const showInstall = canInstall(pwa);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	const isAppsPage = location.pathname.includes("/apps");
@@ -169,8 +171,24 @@ export function Navbar(): JSX.Element {
 					</button>
 				</div>
 
+				{/* In the installed app the rest lives in the tab bar and Settings, so search stands alone */}
+				{pwa.standalone && (
+					<button
+						type="button"
+						onClick={() => {
+							play("tap");
+							openSearch();
+						}}
+						aria-label={t("search.open")}
+						className="md:hidden flex min-w-0 max-w-60 flex-1 items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-sm text-muted-foreground"
+					>
+						<Search size={16} className="shrink-0" />
+						<span className="truncate">{t("search.placeholder")}</span>
+					</button>
+				)}
+
 				{/* Mobile Menu Toggle */}
-				<div className="md:hidden flex items-center gap-2">
+				<div className={cn("md:hidden flex items-center gap-2", pwa.standalone && "hidden")}>
 					<SoundToggle />
 					<ThemeToggle />
 					<button
