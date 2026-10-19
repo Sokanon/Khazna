@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Landmark } from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/Badge";
+import { FallbackImage, ScreenPlaceholder } from "../components/FallbackImage";
 import { BANKS, MOCK_SCREENSHOTS } from "../constants";
 import { useLanguage } from "../hooks/useLanguage";
 import { useSound } from "../hooks/useSound";
@@ -58,11 +59,15 @@ function AppCard({ app }: { app: Bank }): JSX.Element {
 				{hasScreens ? (
 					<div className="w-full h-full relative bg-surface">
 						<div className="absolute inset-0 transition-opacity duration-300">
-							<img
+							<FallbackImage
 								src={screenshots[currentSlide].url}
 								alt={`${t(`entityNames.${app.id}`)} ${currentSlide + 1}`}
 								className="w-full h-full object-cover"
+								loadingClassName="bg-surface-hover motion-safe:animate-pulse"
 								loading="lazy"
+								fallback={
+									<ScreenPlaceholder label={`${t(`entityNames.${app.id}`)} ${currentSlide + 1}`} />
+								}
 							/>
 						</div>
 
@@ -118,10 +123,15 @@ function AppCard({ app }: { app: Bank }): JSX.Element {
 			{/* Meta Info */}
 			<div className="flex items-center gap-3 px-1">
 				<div className="rounded-xl bg-surface border border-border overflow-hidden flex-shrink-0 p-2">
-					<img
+					<FallbackImage
 						src={app.logomarkUrl || app.logoUrl}
 						alt={t(`entityNames.${app.id}`)}
 						className="w-8 h-8 object-contain"
+						fallback={
+							<span className="flex w-8 h-8 items-center justify-center text-muted-subtle">
+								<Landmark size={16} />
+							</span>
+						}
 					/>
 				</div>
 				<div className="flex flex-col">

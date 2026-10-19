@@ -290,10 +290,14 @@
 		"offlineReady": "أصبحت خزنة تعمل بدون إنترنت",
 		"updateReady": "يتوفر إصدار جديد من خزنة",
 		"update": "تحديث",
-		"offline": "أنت غير متصل. الشعارات المحفوظة ما زالت تعمل",
+		"offline": "أنت غير متصل. الشعارات والواجهات المحفوظة ما زالت تعمل",
 		"online": "عاد الاتصال",
 		"fileReady": "ملفك جاهز",
-		"save": "حفظ"
+		"save": "حفظ",
+		"needsConnection": "التحميل يحتاج اتصالاً بالإنترنت",
+		"screenLater": "تظهر عند عودة الاتصال",
+		"screenFailed": "تعذّر تحميل هذه الواجهة",
+		"screensSaved": "حُفظت الواجهات للاستخدام بدون إنترنت"
 	},
 	"tabs": {
 		"label": "التنقل الرئيسي",
@@ -314,6 +318,13 @@
 		"check": "تحقّق",
 		"checking": "جارٍ التحقق",
 		"upToDate": "محدّث",
-		"tryLater": "حاول لاحقاً"
+		"tryLater": "حاول لاحقاً",
+		"offline": "الواجهات بدون إنترنت",
+		"offlineSave": "حفظ",
+		"offlineSaving": "جارٍ الحفظ {{percent}}٪",
+		"offlineSaved": "محفوظة",
+		"offlineWaiting": "بانتظار الاتصال",
+		"offlineResume": "استئناف",
+		"offlineUnavailable": "غير متاح"
 	}
 }

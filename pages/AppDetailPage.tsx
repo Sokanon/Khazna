@@ -4,6 +4,7 @@ import {
 	ChevronRight,
 	Download,
 	DownloadCloud,
+	Landmark,
 	Loader2,
 	X,
 	ZoomIn,
@@ -14,7 +15,9 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { saveFile } from "@/lib/download";
+import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { FallbackImage, ScreenPlaceholder } from "../components/FallbackImage";
 import { FigmaLink } from "../components/FigmaLink";
 import { BANKS, MOCK_SCREENSHOTS } from "../constants";
 import { useBackToClose } from "../hooks/useBackToClose";
@@ -88,6 +91,11 @@ export function AppDetailPage(): JSX.Element {
 	const handleDownloadSingle = useCallback(
 		async (screen: Screenshot) => {
 			if (!bank) return;
+			// The full-size PNGs aren't kept on the device.
+			if (!navigator.onLine) {
+				showToast(t("pwa.needsConnection"), { icon: "offline" });
+				return;
+			}
 			try {
 				play("celebration");
 				setIsDownloadingSingle(true);
@@ -112,6 +120,10 @@ export function AppDetailPage(): JSX.Element {
 
 	const handleDownloadAll = useCallback(async () => {
 		if (!bank || screenshots.length === 0) return;
+		if (!navigator.onLine) {
+			showToast(t("pwa.needsConnection"), { icon: "offline" });
+			return;
+		}
 
 		try {
 			play("celebration");
@@ -167,10 +179,15 @@ export function AppDetailPage(): JSX.Element {
 							<ArrowLeft size={20} className="rtl:rotate-180" />
 						</Link>
 						<div className="flex items-center gap-3">
-							<img
+							<FallbackImage
 								src={bank.logomarkUrl || bank.logoUrl}
 								alt={t(`entityNames.${bank.id}`)}
 								className="w-10 h-10 rounded-lg bg-surface object-cover"
+								fallback={
+									<span className="flex w-10 h-10 items-center justify-center rounded-lg bg-surface text-muted-subtle">
+										<Landmark size={18} />
+									</span>
+								}
 							/>
 							<div>
 								<div className="flex items-center gap-3">
@@ -223,11 +240,13 @@ export function AppDetailPage(): JSX.Element {
 								}}
 								className="relative aspect-9/19 w-full rounded-2xl overflow-hidden border border-border bg-surface cursor-pointer outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
 							>
-								<img
+								<FallbackImage
 									src={screen.url}
 									alt={t(`screenshotLabels.${screen.label}`)}
 									className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+									loadingClassName="bg-surface-hover motion-safe:animate-pulse"
 									loading="lazy"
+									fallback={<ScreenPlaceholder label={t(`screenshotLabels.${screen.label}`)} />}
 								/>
 
 								<div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -310,11 +329,12 @@ export function AppDetailPage(): JSX.Element {
 									<Loader2 size={40} className="animate-spin text-zinc-400" />
 								</div>
 							)}
-							<img
+							<FallbackImage
 								key={selectedScreen.id}
 								src={selectedScreen.url}
 								alt={t(`screenshotLabels.${selectedScreen.label}`)}
 								onLoad={() => setIsImageLoading(false)}
+								onError={() => setIsImageLoading(false)}
 								style={{
 									transform: `translate(${swipe.offset.x}px, ${Math.max(0, swipe.offset.y)}px)`,
 								}}
@@ -323,6 +343,18 @@ export function AppDetailPage(): JSX.Element {
 									!swipe.dragging && "transition-[opacity,transform]",
 									isImageLoading ? "opacity-0" : "opacity-100",
 								)}
+								fallback={
+									<ScreenPlaceholder
+										label={t(`screenshotLabels.${selectedScreen.label}`)}
+										style={{
+											transform: `translate(${swipe.offset.x}px, ${Math.max(0, swipe.offset.y)}px)`,
+										}}
+										className={cn(
+											"h-[70dvh] w-auto aspect-9/19 rounded-lg bg-zinc-900 text-zinc-400 ring-1 ring-white/10",
+											!swipe.dragging && "transition-transform duration-200",
+										)}
+									/>
+								}
 							/>
 
 							<div className="flex items-center gap-4 bg-zinc-900/80 px-6 py-3 rounded-full backdrop-blur-md border border-white/10">

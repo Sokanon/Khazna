@@ -3,6 +3,7 @@ import {
 	ArrowUpRight,
 	Check,
 	ChevronRight,
+	CloudDownload,
 	Figma,
 	Github,
 	Info,
@@ -21,9 +22,12 @@ import { Link, Navigate } from "react-router-dom";
 import { SOCIAL_LINKS } from "../constants";
 import { useContribute } from "../hooks/useContribute";
 import { useLanguage } from "../hooks/useLanguage";
+import { useOfflineScreens } from "../hooks/useOfflineScreens";
+import { useOnline } from "../hooks/useOnline";
 import { usePwa } from "../hooks/usePwa";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
+import { saveScreensOffline } from "../lib/offline";
 import { applyUpdate, checkForUpdate } from "../lib/pwa";
 import { showToast } from "../lib/toast";
 import { cn } from "../lib/utils";
@@ -71,6 +75,62 @@ function Switch({ on }: { on: boolean }): JSX.Element {
 }
 
 type UpdateStatus = "idle" | "checking" | "current" | "unavailable";
+
+/** App UI kept on the device, for whoever asks for it; the app always keeps the logos. */
+function OfflineRow(): JSX.Element {
+	const { saved, total, saving, wanted, available } = useOfflineScreens();
+	const online = useOnline();
+	const { t } = useTranslation();
+	const play = useSound();
+	const done = saved >= total;
+	const percent = Math.floor((saved / total) * 100);
+	const canSave = available && !done && !saving && online;
+
+	let status: ReactNode;
+	if (!available) {
+		status = (
+			<span className="text-sm text-muted-foreground">{t("settings.offlineUnavailable")}</span>
+		);
+	} else if (done) {
+		status = (
+			<span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+				<Check size={14} />
+				{t("settings.offlineSaved")}
+			</span>
+		);
+	} else if (saving) {
+		status = (
+			<span className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+				<Loader2 size={14} className="animate-spin" />
+				{t("settings.offlineSaving", { percent })}
+			</span>
+		);
+	} else if (wanted && !online) {
+		status = <span className="text-sm text-muted-foreground">{t("settings.offlineWaiting")}</span>;
+	} else {
+		status = (
+			<span className="rounded-full bg-accent-bg px-3 py-1 text-xs font-semibold text-accent-text group-disabled:opacity-50">
+				{wanted ? t("settings.offlineResume") : t("settings.offlineSave")}
+			</span>
+		);
+	}
+
+	return (
+		<button
+			type="button"
+			disabled={!canSave}
+			onClick={() => {
+				play("tap");
+				saveScreensOffline();
+			}}
+			className={cn(ROW, "group")}
+		>
+			<RowIcon icon={CloudDownload} />
+			<span className="flex-1 font-medium">{t("settings.offline")}</span>
+			{status}
+		</button>
+	);
+}
 
 /** The installed app's settings, in place of the website's header buttons and menu. */
 export function SettingsPage(): JSX.Element {
@@ -252,6 +312,7 @@ export function SettingsPage(): JSX.Element {
 			</Group>
 
 			<Group title={t("settings.app")}>
+				<OfflineRow />
 				<button
 					type="button"
 					onClick={updates}

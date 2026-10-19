@@ -1,6 +1,7 @@
 import { registerSW } from "virtual:pwa-register";
 import i18n from "../i18n";
 import { trackEvent } from "./analytics";
+import { markOfflineUnavailable, startOfflineScreens } from "./offline";
 import { showToast } from "./toast";
 
 /** Where Khazna is being viewed from, which decides what "Install" can do there. */
@@ -217,6 +218,7 @@ function registerServiceWorker(): void {
 			// The first launch of the installed app is when this is news.
 			if (state.standalone) showToast(i18n.t("pwa.offlineReady"));
 		},
+		onRegisterError: markOfflineUnavailable,
 		onRegisteredSW(_url, swRegistration) {
 			if (!swRegistration) return;
 			registration = swRegistration;
@@ -285,8 +287,12 @@ export function startPwa(): void {
 		window.setTimeout(() => showToast(i18n.t("pwa.offline"), { icon: "offline" }), 1500);
 	}
 
-	// Keeps the browser from clearing the offline copy of an installed app under storage pressure.
-	if (state.standalone) navigator.storage?.persist?.().catch(() => {});
-
 	registerServiceWorker();
+
+	if (state.standalone) {
+		// Keeps the browser from clearing the offline copy of an installed app under storage pressure.
+		navigator.storage?.persist?.().catch(() => {});
+		// The installed app saves all of App UI when asked to in Settings; a browser tab keeps what it shows.
+		if (import.meta.env.PROD) startOfflineScreens();
+	}
 }

@@ -290,10 +290,14 @@
 		"offlineReady": "Khazna now works offline",
 		"updateReady": "A new version of Khazna is ready",
 		"update": "Update",
-		"offline": "You're offline. Saved logos still work",
+		"offline": "You're offline. Saved logos and screens still work",
 		"online": "Back online",
 		"fileReady": "Your file is ready",
-		"save": "Save"
+		"save": "Save",
+		"needsConnection": "Downloads need a connection",
+		"screenLater": "Shows when you're back online",
+		"screenFailed": "Couldn't load this screen",
+		"screensSaved": "App UI is saved for offline"
 	},
 	"tabs": {
 		"label": "Main navigation",
@@ -314,6 +318,13 @@
 		"check": "Check",
 		"checking": "Checking",
 		"upToDate": "Up to date",
-		"tryLater": "Try again later"
+		"tryLater": "Try again later",
+		"offline": "App UI offline",
+		"offlineSave": "Save",
+		"offlineSaving": "Saving {{percent}}%",
+		"offlineSaved": "Saved",
+		"offlineWaiting": "Waiting for connection",
+		"offlineResume": "Resume",
+		"offlineUnavailable": "Not available"
 	}
 }

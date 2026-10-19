@@ -118,12 +118,25 @@ export default defineConfig(({ mode }) => {
 					clientsClaim: true,
 					runtimeCaching: [
 						{
+							// App screenshots (the installed app saves them all, lib/offline.ts) show straight
+							// from the device and refresh in the background when online, so an updated screen
+							// still arrives and a saved one never expires.
 							urlPattern: ({ url, sameOrigin }) =>
-								sameOrigin && /^\/(screenshots|founders)\/.+\.webp$/.test(url.pathname),
+								sameOrigin && /^\/screenshots\/.+\.webp$/.test(url.pathname),
+							handler: "StaleWhileRevalidate",
+							options: {
+								// lib/offline.ts counts what's saved by this name.
+								cacheName: "khazna-screens",
+								expiration: { maxEntries: 1000, purgeOnQuotaError: true },
+							},
+						},
+						{
+							urlPattern: ({ url, sameOrigin }) =>
+								sameOrigin && /^\/founders\/.+\.webp$/.test(url.pathname),
 							handler: "CacheFirst",
 							options: {
 								cacheName: "khazna-images",
-								expiration: { maxEntries: 300, maxAgeSeconds: MONTH, purgeOnQuotaError: true },
+								expiration: { maxEntries: 60, maxAgeSeconds: MONTH, purgeOnQuotaError: true },
 							},
 						},
 						{
