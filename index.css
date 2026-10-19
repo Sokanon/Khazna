@@ -212,7 +212,7 @@ html[lang="ar"] {
 		padding-right: env(safe-area-inset-right);
 	}
 
-	/* No double-tap zoom on controls; pinch zoom still works */
+	/* No double-tap zoom on controls; pinch zoom still works in a browser tab */
 	:is(a, button, label, summary, [role="button"], [role="tab"]) {
 		touch-action: manipulation;
 	}

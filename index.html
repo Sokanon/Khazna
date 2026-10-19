@@ -127,6 +127,13 @@
           ?.setAttribute('content', theme === 'dark' ? 'black' : 'default');
         if (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) {
           document.documentElement.classList.add('is-standalone');
+          // Apps don't pinch zoom in or out, so the installed one doesn't either (a browser tab still does)
+          document
+            .querySelector('meta[name="viewport"]')
+            ?.setAttribute(
+              'content',
+              'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
+            );
           // The launch animation plays once per launch, not on the reload an update makes
           try {
             if (!sessionStorage.getItem('khazna-launched')) {
