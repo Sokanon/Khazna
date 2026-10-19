@@ -29,7 +29,7 @@ const frames = (count: number): Promise<void> =>
 	});
 const wait = (ms: number): Promise<void> => new Promise((done) => window.setTimeout(done, ms));
 
-// The tallest the view has been at each width with no keyboard up.
+// The tallest the view has been at each width with no keyboard up (on its side, with no status bar).
 const fullHeight: Record<number, number> = {};
 function noteFullHeight(): void {
 	if (typing()) return;
@@ -42,11 +42,10 @@ function isShort(): boolean {
 	if (Math.abs(visual.scale - 1) > 0.01) return false;
 	const upright =
 		window.innerWidth === window.screen.width && window.screen.height > window.screen.width;
-	// Upright, the view reaches from under the status bar (62pt at most) to the bottom of the screen.
-	const expected = Math.max(
-		fullHeight[window.innerWidth] ?? 0,
-		upright ? window.screen.height - 70 : 0,
-	);
+	// Upright, the view reaches from under the status bar (62pt at most) to the bottom of the
+	// screen. Not the tallest it has been: at launch iOS lays the page out at the whole screen's
+	// height for a moment, before the status bar takes its place.
+	const expected = upright ? window.screen.height - 70 : (fullHeight[window.innerWidth] ?? 0);
 	return (
 		window.innerHeight < expected - 4 ||
 		visual.offsetTop > 1 ||
