@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { usePwa } from "../hooks/usePwa";
 import { useSound } from "../hooks/useSound";
 import { cn } from "../lib/utils";
+import { settleViewport } from "../lib/viewport";
 
 type Tab = {
 	id: string;
@@ -52,6 +53,8 @@ export function TabBar(): JSX.Element | null {
 	// Runs after ScrollToTop (an earlier sibling), so a restored position wins over the reset.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: restores on every page change
 	useEffect(() => {
+		// A view iOS left short would strand the bar mid-screen on the new page.
+		settleViewport(50);
 		if (restoreTo.current === null) return;
 		const top = restoreTo.current;
 		restoreTo.current = null;

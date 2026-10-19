@@ -1,6 +1,6 @@
 import { Search, X } from "lucide-react";
 import type { ChangeEvent, JSX } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { BANKS, PAYMENT_GATEWAYS, PAYMENT_METHODS } from "../constants";
@@ -71,7 +71,16 @@ export function SearchDialog(): JSX.Element | null {
 	const { closeSearch, getLogoUrl, isSearchOpen, openSearch, setSelectedItem } = useUIContext();
 	const [query, setQuery] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
-	const dismiss = useBackToClose(isSearchOpen, closeSearch);
+	const goBack = useBackToClose(isSearchOpen, closeSearch);
+	// The field lets go of the keyboard before it leaves the page: removed while focused, iOS 26
+	// can leave the view short with the tab bar stranded mid-screen.
+	const dismiss = useCallback(
+		(after?: () => void) => {
+			inputRef.current?.blur();
+			goBack(after);
+		},
+		[goBack],
+	);
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent): void {

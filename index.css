@@ -231,6 +231,12 @@ html[lang="ar"] {
 		user-select: none;
 	}
 
+	/* For a moment the page is taller than the screen, so iOS gives back a view it left short
+	   (lib/viewport.ts) */
+	.vv-room body {
+		min-height: calc(100dvh + 50vh);
+	}
+
 	/* Height of the installed app's bottom tab bar on phone-sized screens (components/TabBar.tsx).
 	   Anything scrolled into view (focus, find) stops above it rather than under it. */
 	@media (width < 48rem) {
