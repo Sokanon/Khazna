@@ -13,10 +13,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
-import { downloadBlob } from "@/lib/download";
+import { saveFile } from "@/lib/download";
+import { cn } from "@/lib/utils";
 import { FigmaLink } from "../components/FigmaLink";
 import { BANKS, MOCK_SCREENSHOTS } from "../constants";
+import { useLanguage } from "../hooks/useLanguage";
 import { useSound } from "../hooks/useSound";
+import { useSwipe } from "../hooks/useSwipe";
 import type { Screenshot } from "../types";
 
 export function AppDetailPage(): JSX.Element {
@@ -49,6 +52,20 @@ export function AppDetailPage(): JSX.Element {
 		[selectedScreen, screenshots, play],
 	);
 
+	const { isRTL } = useLanguage();
+	const swipe = useSwipe({
+		axis: "both",
+		onSwipe: (direction) => {
+			if (direction === "down") {
+				play("select");
+				setSelectedScreen(null);
+			} else if (direction !== "up") {
+				// Arabic reads right to left, so the next screen comes in from the left.
+				navigateLightbox(direction === (isRTL ? "right" : "left") ? "next" : "prev");
+			}
+		},
+	});
+
 	useEffect(() => {
 		if (!selectedScreen) return;
 
@@ -75,7 +92,7 @@ export function AppDetailPage(): JSX.Element {
 				const response = await fetch(screen.downloadUrl);
 				const blob = await response.blob();
 				const filename = `${bank.name.toLowerCase().replace(/\s+/g, "-")}-${screen.label.toLowerCase().replace(/\s+/g, "-")}.png`;
-				downloadBlob(blob, filename);
+				await saveFile(blob, filename);
 				trackEvent("screen_download", {
 					bank_id: bank.id,
 					bank_name: bank.name,
@@ -116,7 +133,7 @@ export function AppDetailPage(): JSX.Element {
 
 			const content = await zip.generateAsync({ type: "blob" });
 			const zipName = `${bank.name.toLowerCase().replace(/\s+/g, "-")}-ui-kit.zip`;
-			downloadBlob(content, zipName);
+			await saveFile(content, zipName);
 			trackEvent("ui_kit_download_all", {
 				bank_id: bank.id,
 				bank_name: bank.name,
@@ -239,11 +256,12 @@ export function AppDetailPage(): JSX.Element {
 				// biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop, can't be <button> (contains interactive children)
 				// biome-ignore lint/a11y/useKeyWithClickEvents: same reason
 				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200"
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200 touch-pinch-zoom"
 					onClick={() => {
 						play("select");
 						setSelectedScreen(null);
 					}}
+					{...swipe.handlers}
 				>
 					<button
 						type="button"
@@ -295,7 +313,14 @@ export function AppDetailPage(): JSX.Element {
 								src={selectedScreen.url}
 								alt={t(`screenshotLabels.${selectedScreen.label}`)}
 								onLoad={() => setIsImageLoading(false)}
-								className={`max-h-[85vh] w-auto object-contain rounded-lg shadow-2xl ring-1 ring-white/10 transition-opacity duration-200 ${isImageLoading ? "opacity-0" : "opacity-100"}`}
+								style={{
+									transform: `translate(${swipe.offset.x}px, ${Math.max(0, swipe.offset.y)}px)`,
+								}}
+								className={cn(
+									"max-h-[85dvh] w-auto object-contain rounded-lg shadow-2xl ring-1 ring-white/10 transition-opacity duration-200",
+									!swipe.dragging && "transition-[opacity,transform]",
+									isImageLoading ? "opacity-0" : "opacity-100",
+								)}
 							/>
 
 							<div className="flex items-center gap-4 bg-zinc-900/80 px-6 py-3 rounded-full backdrop-blur-md border border-white/10">

@@ -200,8 +200,33 @@ html[lang="ar"] {
 	* {
 		@apply border-border outline-ring/50;
 	}
+	html {
+		-webkit-tap-highlight-color: transparent;
+	}
 	body {
 		@apply bg-background text-foreground;
+		/* Clear of the notch when a phone is turned sideways (viewport-fit=cover) */
+		padding-left: env(safe-area-inset-left);
+		padding-right: env(safe-area-inset-right);
+	}
+
+	/* No double-tap zoom on controls; pinch zoom still works */
+	:is(a, button, label, summary, [role="button"], [role="tab"]) {
+		touch-action: manipulation;
+	}
+
+	/* Touch screens get no hover styles, so a press shows instead */
+	@media (hover: none) and (pointer: coarse) {
+		:is(a, button, [role="button"], [role="tab"]):not(:disabled):active {
+			opacity: 0.7;
+		}
+	}
+
+	/* In the installed app, a long press on a control shouldn't select its text or open a link preview */
+	.is-standalone :is(a, button, label, summary, [role="button"], [role="tab"], img) {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
 	}
 }
 

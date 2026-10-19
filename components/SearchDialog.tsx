@@ -179,7 +179,7 @@ export function SearchDialog(): JSX.Element | null {
 					</button>
 				</div>
 
-				<div className="max-h-[60vh] overflow-y-auto p-2">
+				<div className="max-h-[60dvh] overflow-y-auto overscroll-contain p-2">
 					{results.length > 0 ? (
 						<ul className="space-y-1">
 							{results.map((result) => (

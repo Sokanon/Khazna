@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import type { JSX } from "react";
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -5,11 +6,15 @@ import { useTranslation } from "react-i18next";
 import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { Contributors } from "./components/Contributors";
 import { DetailPanel } from "./components/DetailPanel";
+import { InstallBanner, InstallSheet } from "./components/InstallPrompt";
 import { Navbar } from "./components/Navbar";
 import { SearchDialog } from "./components/SearchDialog";
 import { Toaster } from "./components/Toaster";
+import { UpdateBar } from "./components/UpdateBar";
+import { usePwa } from "./hooks/usePwa";
 import { useScrollSound } from "./hooks/useScrollSound";
 import { useUIContext } from "./hooks/useUIContext";
+import { canInstall, startInstall } from "./lib/pwa";
 import { AboutPage } from "./pages/AboutPage";
 import { AppDetailPage } from "./pages/AppDetailPage";
 import { AppsPage } from "./pages/AppsPage";
@@ -27,13 +32,14 @@ import type {
 
 export const UIContext = createContext<UIContextType | null>(null);
 
-// Matches --background values from index.css for each theme (used by fallback animation)
+// Matches --background values from index.css for each theme (used by fallback animation and the status bar)
 const THEME_BG: Record<Theme, string> = { dark: "#080808", light: "#ffffff" };
 
 function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 	const { closeSidebar, isSidebarOpen } = useUIContext();
 	const { pathname } = useLocation();
 	const { t } = useTranslation();
+	const showInstall = canInstall(usePwa());
 
 	useScrollSound();
 
@@ -50,7 +56,7 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 			>
 				<main className="max-w-400 mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">{children}</main>
 				<Contributors />
-				<footer className="border-t border-border/30 py-5 px-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+				<footer className="border-t border-border/30 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] px-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
 					{/* Built by badge */}
 					<Link
 						to="/about#team"
@@ -103,10 +109,29 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 						<img src="/binary-logo.svg" alt="Binary" className="h-4 w-4 dark:invert" />
 						<span className="font-medium">Binary</span>
 					</a>
+
+					{showInstall && (
+						<>
+							<span className="text-muted-subtle text-xl leading-none select-none" aria-hidden>
+								•
+							</span>
+							<button
+								type="button"
+								onClick={() => startInstall("footer")}
+								className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+							>
+								<Download size={14} />
+								{t("pwa.installApp")}
+							</button>
+						</>
+					)}
 				</footer>
 			</div>
 			<DetailPanel />
 			<SearchDialog />
+			<InstallBanner />
+			<InstallSheet />
+			<UpdateBar />
 			<Toaster />
 		</div>
 	);
@@ -208,11 +233,14 @@ function App(): JSX.Element {
 		[logoStyle],
 	);
 
-	// Sync theme class to <html>. Only persist to localStorage if the user
+	// Sync theme class and status bar color to <html>. Only persist to localStorage if the user
 	// explicitly toggled (not auto-detected from system preference), so that
 	// subsequent visits re-check the OS preference.
 	useEffect(() => {
 		document.documentElement.classList.toggle("dark", theme === "dark");
+		for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+			meta.setAttribute("content", THEME_BG[theme]);
+		}
 		if (hasExplicitChoice.current) {
 			localStorage.setItem("khazna-theme", theme);
 		}

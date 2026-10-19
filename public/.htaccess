@@ -8,9 +8,11 @@
   RewriteRule . /index.html [L]
 </IfModule>
 
+AddType application/manifest+json .webmanifest
+
 # Compression
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml font/woff font/woff2
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml font/woff font/woff2
 </IfModule>
 
 # Long cache for fingerprinted Vite assets
@@ -27,6 +29,12 @@
   # HTML must always revalidate so deploys go live
   <FilesMatch "\.(?:html)$">
     Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # Same for the service worker and the manifest, or the installed app stops getting updates
+  <FilesMatch "^(?:sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+    Header unset Expires
   </FilesMatch>
 </IfModule>
 
