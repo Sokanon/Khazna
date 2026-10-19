@@ -131,10 +131,7 @@ export function SearchDialog(): JSX.Element | null {
 			return;
 		}
 
-		navigate("/");
-		window.setTimeout(() => {
-			setSelectedItem(result.item);
-		}, 0);
+		setSelectedItem(result.item);
 	}
 
 	if (!isSearchOpen) return null;
