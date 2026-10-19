@@ -1,6 +1,7 @@
 import { trackEvent } from "@/lib/analytics";
 import { convertSvgToImage, saveFile } from "@/lib/download";
 import { generateCode } from "@/lib/generators";
+import { showToast } from "@/lib/toast";
 import {
 	Check,
 	Circle,
@@ -10,6 +11,7 @@ import {
 	FileCode,
 	Image as ImageIcon,
 	LayoutGrid,
+	Link,
 	Loader2,
 	Palette,
 	Stamp,
@@ -182,6 +184,20 @@ export function DetailPanel(): JSX.Element | null {
 		setTimeout(() => setCopied(false), 600);
 	}
 
+	function handleShare(): void {
+		if (!selectedItem) return;
+		const url = `${window.location.origin}/?logo=${selectedItem.id}`;
+
+		if (window.matchMedia("(pointer: coarse)").matches && typeof navigator.share === "function") {
+			play("tap");
+			navigator.share({ title: t(`entityNames.${selectedItem.id}`), url }).catch(() => {});
+			return;
+		}
+
+		play("notification");
+		navigator.clipboard.writeText(url).then(() => showToast(t("common.linkCopied")));
+	}
+
 	async function handleDownload(format: string): Promise<void> {
 		if (!selectedItem || !activeSvg || isProcessing) return;
 
@@ -303,6 +319,14 @@ export function DetailPanel(): JSX.Element | null {
 									/>
 								)}
 								<div className="flex items-center gap-1 ms-auto">
+									<button
+										type="button"
+										onClick={handleShare}
+										title={t("sidebar.shareLink")}
+										className="w-7 h-7 flex items-center justify-center rounded-md border transition-all bg-surface border-border text-muted-foreground hover:text-primary hover:bg-surface-hover"
+									>
+										<Link size={13} />
+									</button>
 									{/* Logo style: Stamp = logomark, Type = branded */}
 									<button
 										type="button"
