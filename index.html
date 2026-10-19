@@ -135,10 +135,10 @@
               // iOS's launch image is centred on the whole screen while the page starts below the
               // status bar, so the animation is sized to the screen and anchored to the bottom edge
               if (navigator.standalone === true && matchMedia('(orientation: portrait)').matches) {
-                document.documentElement.style.setProperty('--splash-screen-h', screen.height + 'px');
+                document.documentElement.style.setProperty('--splash-screen-h', `${screen.height}px`);
               }
             }
-          } catch (e) {}
+          } catch {}
         }
         document.documentElement.lang = lang;
         document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -148,7 +148,7 @@
   <body class="bg-background text-primary font-sans antialiased">
     <!-- Launch animation for the installed app: the ring of logo-only.svg turns like a vault dial -->
     <div id="splash" aria-hidden="true">
-      <svg viewBox="0 0 615 560">
+      <svg viewBox="0 0 615 560" aria-hidden="true">
         <g class="splash-ring">
           <path d="M77.91 208.15L75.71 206.86L80.01 195.59L9.80994 154.49L1.95996 163.69L0 162.55L17.97 131.85L19.9299 133L15.6799 144.47L85.88 185.57L93.6799 176.18L95.88 177.47L77.91 208.17V208.15ZM109.99 153.36L50.3 162.75L49.9299 162.53L36.15 110.61L27.53 120.01L25.5699 118.86L39.96 94.2803L41.92 95.4203L39.13 104.95L51.17 151.41L111.59 141.62L118.39 133.94L120.59 135.23L109.99 153.33V153.36Z" />
           <path d="M126.6 131.59L125.2 129.8L130.45 123.17L77.5201 55.5402L67.9801 57.6102L67.3701 56.8302L78.4601 40.4102L108.77 79.1402C108.87 78.3402 109.08 76.9802 109.42 75.0302C109.76 73.0902 110.3 70.8602 111.04 68.3602C111.78 65.8602 112.87 63.3902 114.32 60.9402C115.76 58.4902 117.6 56.3902 119.83 54.6502C124.29 51.1602 128.69 49.7602 133.01 50.4502C137.33 51.1502 142.06 54.7702 147.18 61.3102L170.85 91.5502L178.77 87.8702L180.17 89.6602L158.97 106.25L157.57 104.46L162.93 97.7402L139.26 67.5002C136.62 64.2902 133.57 62.1502 130.1 61.0802C126.63 60.0202 123.26 60.7702 119.98 63.3302C116.86 65.7802 114.64 68.7702 113.33 72.3102C112.02 75.8502 111.05 78.8302 110.42 81.2402L138.37 116.95L146.74 112.92L148.14 114.71L126.6 131.57V131.59Z" />
