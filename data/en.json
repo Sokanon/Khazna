@@ -86,9 +86,8 @@
 		"becomeContributor": "Become a contributor",
 		"viewOnGithub": "View on GitHub",
 		"contributingGuide": "Contributing Guide",
-		"communityTitle": "Free and open source",
-		"communitySubtitle": "Built by the community",
-		"communityCta": "Khazna welcomes contributions from everyone"
+		"communityTitle": "Built by the community",
+		"communityCta": "Join us, leave your mark"
 	},
 	"badge": {
 		"new": "New",

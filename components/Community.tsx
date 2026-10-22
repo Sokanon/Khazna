@@ -74,21 +74,11 @@ export function Community(): JSX.Element {
 	const { t } = useTranslation();
 
 	return (
-		<section className="border-t border-border/50 px-4 py-24 text-center sm:px-6 lg:px-8">
-			<img
-				src="/logo-only.svg"
-				alt=""
-				width={615}
-				height={560}
-				loading="lazy"
-				className="pointer-events-none mx-auto h-auto w-32 invert dark:invert-0 md:w-40"
-			/>
-			<h2 className="mt-12 text-[clamp(2rem,6vw,4.5rem)] font-black leading-none text-primary">
+		<section className="border-t border-border/50 px-4 py-16 text-center sm:px-6 lg:px-8">
+			<h2 className="text-2xl font-bold text-primary md:text-3xl">
 				{t("contributors.communityTitle")}
-				<br />
-				<span className="font-light">{t("contributors.communitySubtitle")}</span>
 			</h2>
-			<p className="mt-10 text-lg font-light md:text-2xl">
+			<p className="mt-3 text-base font-light md:text-lg">
 				<Link
 					to="/contributing"
 					className="text-muted-foreground transition-colors hover:text-primary hover:underline"
@@ -97,7 +87,7 @@ export function Community(): JSX.Element {
 				</Link>
 			</p>
 			<TooltipProvider delayDuration={0}>
-				<div className="mx-auto mt-10 flex max-w-4xl flex-wrap justify-center">
+				<div className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center">
 					{CONTRIBUTORS.map((contributor) => (
 						<Avatar key={contributor.name} contributor={contributor} />
 					))}
