@@ -1,7 +1,3 @@
-import { trackEvent } from "@/lib/analytics";
-import { convertSvgToImage, saveFile } from "@/lib/download";
-import { generateCode } from "@/lib/generators";
-import { showToast } from "@/lib/toast";
 import {
 	Check,
 	Circle,
@@ -21,6 +17,10 @@ import {
 import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { trackEvent } from "@/lib/analytics";
+import { convertSvgToImage, saveFile } from "@/lib/download";
+import { generateCode } from "@/lib/generators";
+import { showToast } from "@/lib/toast";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
 import { FigmaLink } from "./FigmaLink";
