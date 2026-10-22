@@ -7,7 +7,8 @@
 		"screens": "واجهة",
 		"noScreenshots": "لا توجد لقطات شاشة",
 		"community": "المجتمع",
-		"emailCopied": "تم نسخ البريد الإلكتروني"
+		"emailCopied": "تم نسخ البريد الإلكتروني",
+		"linkCopied": "تم نسخ الرابط"
 	},
 	"navbar": {
 		"logos": "الشعارات",
@@ -21,6 +22,14 @@
 		"switchLanguage": "تغيير اللغة",
 		"github": "فتح مستودع GitHub",
 		"figma": "فتح مكتبة Figma Community"
+	},
+	"theme": {
+		"switchToLight": "التبديل إلى الوضع الفاتح",
+		"switchToDark": "التبديل إلى الوضع الداكن"
+	},
+	"sound": {
+		"mute": "كتم الأصوات",
+		"enable": "تفعيل الأصوات"
 	},
 	"search": {
 		"open": "فتح البحث",
@@ -64,7 +73,8 @@
 		"downloadFailed": "تعذر تحويل الصورة. جرب التحميل كـ SVG.",
 		"downloadImageFailed": "فشل تحميل الصورة.",
 		"zipFailed": "فشل إنشاء ملف مضغوط.",
-		"cdnUrl": "رابط CDN"
+		"cdnUrl": "رابط CDN",
+		"shareLink": "مشاركة الرابط"
 	},
 	"contributors": {
 		"contributors": "المساهمون",
@@ -239,7 +249,10 @@
 		"Transfer Success": "اكتمال التحويل",
 		"Transfer Receipt": "إيصال التحويل",
 		"Statement Request": "طلب كشف",
-		"Terms of Use": "شروط الاستخدام"
+		"Terms of Use": "شروط الاستخدام",
+		"Account": "الحساب",
+		"Request Card": "طلب بطاقة",
+		"Control Panel": "لوحة التحكم"
 	},
 	"screenshotCategories": {
 		"onboarding": "البدء",

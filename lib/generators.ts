@@ -17,9 +17,24 @@ function extractSvgInfo(svgString: string): SvgInfo {
 }
 
 function replaceNonNoneFills(content: string, replacement: string): string {
-	return content.replace(/fill="[^"]*"/g, (match) =>
-		match.includes("none") ? match : replacement,
+	return content.replace(/<mask[\s\S]*?<\/mask>|fill="[^"]*"/g, (match) =>
+		match.startsWith("<mask") || match.includes("none") ? match : replacement,
 	);
+}
+
+function toCamelCase(name: string): string {
+	return name.replace(/[-:]([a-z])/g, (_, char: string) => char.toUpperCase());
+}
+
+function styleToJsx(css: string): string {
+	const entries = css
+		.split(";")
+		.filter((rule) => rule.includes(":"))
+		.map((rule) => {
+			const [property, ...value] = rule.split(":");
+			return `${toCamelCase(property.trim())}: "${value.join(":").trim()}"`;
+		});
+	return `{{ ${entries.join(", ")} }}`;
 }
 
 export function generateCode(
@@ -34,7 +49,9 @@ export function generateCode(
 		case "React": {
 			const cleanContent = replaceNonNoneFills(content, "fill={color}")
 				.replace(/fill-opacity="[^"]*"/g, "")
-				.replace(/class=/g, "className=");
+				.replace(/class=/g, "className=")
+				.replace(/style="([^"]*)"/g, (_, css: string) => `style=${styleToJsx(css)}`)
+				.replace(/ (?!data-|aria-)[a-z]+[-:][a-z:-]+=/g, toCamelCase);
 
 			return `export const ${pascalName} = ({ size = 24, color = "#000000" }) => {
   return (

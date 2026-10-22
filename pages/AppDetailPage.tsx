@@ -105,7 +105,7 @@ export function AppDetailPage(): JSX.Element {
 				try {
 					const response = await fetch(screen.downloadUrl);
 					const blob = await response.blob();
-					const filename = `${screen.label.replace(/\s+/g, "-").toLowerCase()}.png`;
+					const filename = screen.downloadUrl.slice(screen.downloadUrl.lastIndexOf("/") + 1);
 					folder?.file(filename, blob);
 				} catch (err) {
 					console.warn(`Failed to fetch ${screen.url}`, err);

@@ -1,6 +1,7 @@
 import { trackEvent } from "@/lib/analytics";
 import { convertSvgToImage, downloadBlob } from "@/lib/download";
 import { generateCode } from "@/lib/generators";
+import { showToast } from "@/lib/toast";
 import {
 	Check,
 	Circle,
@@ -10,6 +11,7 @@ import {
 	FileCode,
 	Image as ImageIcon,
 	LayoutGrid,
+	Link,
 	Loader2,
 	Palette,
 	Stamp,
@@ -77,16 +79,18 @@ function ColorPill({ color }: { color: string }): JSX.Element {
 	);
 }
 
+function recolorOutsideMasks(svg: string, color: string): string {
+	return svg.replace(/<mask[\s\S]*?<\/mask>|(fill|stroke)="(?!none)[^"]*"/g, (match, attr) =>
+		attr ? `${attr}="${color}"` : match,
+	);
+}
+
 function makeWhiteSvg(svg: string): string {
-	return svg
-		.replace(/fill="(?!none)[^"]*"/g, 'fill="white"')
-		.replace(/stroke="(?!none)[^"]*"/g, 'stroke="white"');
+	return recolorOutsideMasks(svg, "white");
 }
 
 function makeBlackSvg(svg: string): string {
-	return svg
-		.replace(/fill="(?!none)[^"]*"/g, 'fill="black"')
-		.replace(/stroke="(?!none)[^"]*"/g, 'stroke="black"');
+	return recolorOutsideMasks(svg, "black");
 }
 
 export function DetailPanel(): JSX.Element | null {
@@ -178,6 +182,20 @@ export function DetailPanel(): JSX.Element | null {
 		navigator.clipboard.writeText(generatedCode);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 600);
+	}
+
+	function handleShare(): void {
+		if (!selectedItem) return;
+		const url = `${window.location.origin}/?logo=${selectedItem.id}`;
+
+		if (window.matchMedia("(pointer: coarse)").matches && typeof navigator.share === "function") {
+			play("tap");
+			navigator.share({ title: t(`entityNames.${selectedItem.id}`), url }).catch(() => {});
+			return;
+		}
+
+		play("notification");
+		navigator.clipboard.writeText(url).then(() => showToast(t("common.linkCopied")));
 	}
 
 	async function handleDownload(format: string): Promise<void> {
@@ -300,6 +318,14 @@ export function DetailPanel(): JSX.Element | null {
 									/>
 								)}
 								<div className="flex items-center gap-1 ms-auto">
+									<button
+										type="button"
+										onClick={handleShare}
+										title={t("sidebar.shareLink")}
+										className="w-7 h-7 flex items-center justify-center rounded-md border transition-all bg-surface border-border text-muted-foreground hover:text-primary hover:bg-surface-hover"
+									>
+										<Link size={13} />
+									</button>
 									{/* Logo style: Stamp = logomark, Type = branded */}
 									<button
 										type="button"

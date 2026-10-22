@@ -7,7 +7,8 @@
 		"screens": "Screens",
 		"noScreenshots": "No screenshots available",
 		"community": "Community",
-		"emailCopied": "Email copied to clipboard"
+		"emailCopied": "Email copied to clipboard",
+		"linkCopied": "Link copied to clipboard"
 	},
 	"navbar": {
 		"logos": "Logos",
@@ -21,6 +22,14 @@
 		"switchLanguage": "Switch language",
 		"github": "Open GitHub repository",
 		"figma": "Open Figma Community library"
+	},
+	"theme": {
+		"switchToLight": "Switch to light mode",
+		"switchToDark": "Switch to dark mode"
+	},
+	"sound": {
+		"mute": "Mute sounds",
+		"enable": "Enable sounds"
 	},
 	"search": {
 		"open": "Open search",
@@ -64,7 +73,8 @@
 		"downloadFailed": "Could not convert image. Try downloading as SVG.",
 		"downloadImageFailed": "Failed to download image.",
 		"zipFailed": "Failed to create zip file.",
-		"cdnUrl": "CDN URL"
+		"cdnUrl": "CDN URL",
+		"shareLink": "Share link"
 	},
 	"contributors": {
 		"contributors": "Contributors",
@@ -239,7 +249,10 @@
 		"Transfer Success": "Transfer Success",
 		"Transfer Receipt": "Transfer Receipt",
 		"Statement Request": "Statement Request",
-		"Terms of Use": "Terms of Use"
+		"Terms of Use": "Terms of Use",
+		"Account": "Account",
+		"Request Card": "Request Card",
+		"Control Panel": "Control Panel"
 	},
 	"screenshotCategories": {
 		"onboarding": "Onboarding",
