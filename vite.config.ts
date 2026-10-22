@@ -107,8 +107,12 @@ export default defineConfig(({ mode }) => {
 						"**/*.{js,css,html}",
 						"*.svg",
 						"fonts/*",
+						"apple-touch-icon.png",
 						"founders/sm/*.webp",
+						"contributors/*.webp",
 						"cdn/v1/logos/**/*.svg",
+						// Precached, not runtime cached: <audio> fetches byte ranges, and a 206 can't be cached.
+						"sounds/*.{wav,m4a}",
 					],
 					navigateFallback: "/index.html",
 					// Real files (logos on the CDN path, screenshots, sounds) are never answered with the app.
