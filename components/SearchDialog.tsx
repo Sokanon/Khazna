@@ -1,9 +1,10 @@
 import { Search, X } from "lucide-react";
 import type { ChangeEvent, JSX } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { BANKS, PAYMENT_GATEWAYS, PAYMENT_METHODS } from "../constants";
+import { useBackToClose } from "../hooks/useBackToClose";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
 import i18n from "../i18n";
@@ -70,6 +71,16 @@ export function SearchDialog(): JSX.Element | null {
 	const { closeSearch, getLogoUrl, isSearchOpen, openSearch, setSelectedItem } = useUIContext();
 	const [query, setQuery] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
+	const goBack = useBackToClose(isSearchOpen, closeSearch);
+	// The field lets go of the keyboard before it leaves the page: removed while focused, iOS 26
+	// can leave the view short with the tab bar stranded mid-screen.
+	const dismiss = useCallback(
+		(after?: () => void) => {
+			inputRef.current?.blur();
+			goBack(after);
+		},
+		[goBack],
+	);
 
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent): void {
@@ -84,13 +95,13 @@ export function SearchDialog(): JSX.Element | null {
 
 			if (event.key === "Escape" && isSearchOpen) {
 				event.preventDefault();
-				closeSearch();
+				dismiss();
 			}
 		}
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [closeSearch, isSearchOpen, openSearch, play]);
+	}, [dismiss, isSearchOpen, openSearch, play]);
 
 	useEffect(() => {
 		if (!isSearchOpen) {
@@ -114,7 +125,7 @@ export function SearchDialog(): JSX.Element | null {
 
 	function handleClose(): void {
 		play("tap");
-		closeSearch();
+		dismiss();
 	}
 
 	function handleChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -124,14 +135,14 @@ export function SearchDialog(): JSX.Element | null {
 
 	function handleSelect(result: SearchResult): void {
 		play("select");
-		closeSearch();
+		dismiss(() => {
+			if (result.kind === "app") {
+				navigate(`/apps/${result.item.id}`);
+				return;
+			}
 
-		if (result.kind === "app") {
-			navigate(`/apps/${result.item.id}`);
-			return;
-		}
-
-		setSelectedItem(result.item);
+			setSelectedItem(result.item);
+		});
 	}
 
 	if (!isSearchOpen) return null;
@@ -176,7 +187,7 @@ export function SearchDialog(): JSX.Element | null {
 					</button>
 				</div>
 
-				<div className="max-h-[60vh] overflow-y-auto p-2">
+				<div className="max-h-[60dvh] overflow-y-auto overscroll-contain p-2">
 					{results.length > 0 ? (
 						<ul className="space-y-1">
 							{results.map((result) => (
@@ -212,7 +223,8 @@ export function SearchDialog(): JSX.Element | null {
 					)}
 				</div>
 
-				<div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
+				{/* Keyboard shortcuts mean nothing on a touch screen */}
+				<div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground pointer-coarse:hidden">
 					<span>{t("search.shortcutHint")}</span>
 					<kbd className="rounded border border-border-subtle bg-surface px-1.5 py-0.5 font-semibold">
 						Esc

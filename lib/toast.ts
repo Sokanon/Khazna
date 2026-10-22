@@ -1,11 +1,23 @@
-export type ToastDetail = { id: number; message: string };
+export type ToastIcon = "check" | "offline" | "online";
+
+export type ToastAction = { label: string; onClick: () => void };
+
+export type ToastDetail = { id: number; message: string; icon: ToastIcon; action?: ToastAction };
 
 const TOAST_EVENT = "khazna:toast";
 
 let nextId = 1;
 
-export function showToast(message: string): void {
-	const detail: ToastDetail = { id: nextId++, message };
+export function showToast(
+	message: string,
+	options: { icon?: ToastIcon; action?: ToastAction } = {},
+): void {
+	const detail: ToastDetail = {
+		id: nextId++,
+		message,
+		icon: options.icon ?? "check",
+		action: options.action,
+	};
 	window.dispatchEvent(new CustomEvent<ToastDetail>(TOAST_EVENT, { detail }));
 }
 

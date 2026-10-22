@@ -1,5 +1,5 @@
 import { trackEvent } from "@/lib/analytics";
-import { convertSvgToImage, downloadBlob } from "@/lib/download";
+import { convertSvgToImage, saveFile } from "@/lib/download";
 import { generateCode } from "@/lib/generators";
 import { showToast } from "@/lib/toast";
 import {
@@ -214,13 +214,13 @@ export function DetailPanel(): JSX.Element | null {
 		try {
 			if (format === "SVG") {
 				const blob = new Blob([activeSvg], { type: "image/svg+xml" });
-				downloadBlob(blob, `${filename}.svg`);
+				await saveFile(blob, `${filename}.svg`);
 			} else {
 				const mimeType = format === "PNG" ? "image/png" : "image/webp";
 				const dataUrl = await convertSvgToImage(activeSvg, 1024, 1024, mimeType);
 				const res = await fetch(dataUrl);
 				const blob = await res.blob();
-				downloadBlob(blob, `${filename}.${format.toLowerCase()}`);
+				await saveFile(blob, `${filename}.${format.toLowerCase()}`);
 			}
 			trackEvent("logo_download", {
 				logo_id: selectedItem.id,
@@ -246,6 +246,7 @@ export function DetailPanel(): JSX.Element | null {
       w-full xl:w-[400px]
       bg-background border-s border-border
       transform transition-transform duration-300 ease-in-out
+      motion-safe:animate-in motion-safe:slide-in-from-end
       flex flex-col shadow-2xl shadow-black/20 dark:shadow-black
       ${isSidebarOpen ? "translate-x-0" : "ltr:translate-x-full rtl:-translate-x-full"}
     `}
@@ -268,7 +269,7 @@ export function DetailPanel(): JSX.Element | null {
 			</div>
 
 			{selectedItem ? (
-				<div className="flex-1 overflow-y-auto">
+				<div className="flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
 					{/* Preview Area — background adapts to keep logos always visible */}
 					<div
 						className={`relative aspect-square w-full border-b border-border flex items-center justify-center p-12 overflow-hidden group ${

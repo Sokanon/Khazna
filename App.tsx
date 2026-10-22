@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import type { JSX } from "react";
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -6,17 +7,23 @@ import { Link, Route, Routes, useLocation, useNavigate, useSearchParams } from "
 import { Community } from "./components/Community";
 import { Contributors } from "./components/Contributors";
 import { DetailPanel } from "./components/DetailPanel";
+import { InstallBanner, InstallSheet } from "./components/InstallPrompt";
 import { Navbar } from "./components/Navbar";
 import { SearchDialog } from "./components/SearchDialog";
+import { TabBar } from "./components/TabBar";
 import { Toaster } from "./components/Toaster";
+import { UpdateBar } from "./components/UpdateBar";
 import { BANKS, PAYMENT_GATEWAYS, PAYMENT_METHODS } from "./constants";
+import { usePwa } from "./hooks/usePwa";
 import { useScrollSound } from "./hooks/useScrollSound";
 import { useUIContext } from "./hooks/useUIContext";
+import { canInstall, startInstall } from "./lib/pwa";
 import { AboutPage } from "./pages/AboutPage";
 import { AppDetailPage } from "./pages/AppDetailPage";
 import { AppsPage } from "./pages/AppsPage";
 import { ContributingPage } from "./pages/ContributingPage";
 import { HomePage } from "./pages/HomePage";
+import { SettingsPage } from "./pages/SettingsPage";
 import type {
 	BaseEntity,
 	ColorMode,
@@ -29,7 +36,7 @@ import type {
 
 export const UIContext = createContext<UIContextType | null>(null);
 
-// Matches --background values from index.css for each theme (used by fallback animation)
+// Matches --background values from index.css for each theme (used by fallback animation and the status bar)
 const THEME_BG: Record<Theme, string> = { dark: "#080808", light: "#ffffff" };
 
 const LOGOS = [...BANKS, ...PAYMENT_METHODS, ...PAYMENT_GATEWAYS];
@@ -37,11 +44,12 @@ const LOGOS = [...BANKS, ...PAYMENT_METHODS, ...PAYMENT_GATEWAYS];
 function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 	const { isSidebarOpen } = useUIContext();
 	const { t } = useTranslation();
+	const showInstall = canInstall(usePwa());
 
 	useScrollSound();
 
 	return (
-		<div className="min-h-screen bg-background text-primary">
+		<div className="min-h-screen bg-background text-primary pb-[var(--tab-bar-h,0px)]">
 			<Navbar />
 			<div
 				className={`relative transition-[padding] duration-300 flex-1 flex flex-col ${isSidebarOpen ? "xl:pe-[400px]" : ""}`}
@@ -49,7 +57,7 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 				<main className="max-w-400 mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">{children}</main>
 				<Community />
 				<Contributors />
-				<footer className="border-t border-border/30 py-5 px-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+				<footer className="border-t border-border/30 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] px-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
 					{/* Built by badge */}
 					<Link
 						to="/about#team"
@@ -102,10 +110,30 @@ function Layout({ children }: { children: React.ReactNode }): JSX.Element {
 						<img src="/binary-logo.svg" alt="Binary" className="h-4 w-4 dark:invert" />
 						<span className="font-medium">Binary</span>
 					</a>
+
+					{showInstall && (
+						<>
+							<span className="text-muted-subtle text-xl leading-none select-none" aria-hidden>
+								•
+							</span>
+							<button
+								type="button"
+								onClick={() => startInstall("footer")}
+								className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+							>
+								<Download size={14} />
+								{t("pwa.installApp")}
+							</button>
+						</>
+					)}
 				</footer>
 			</div>
 			<DetailPanel />
 			<SearchDialog />
+			<InstallBanner />
+			<InstallSheet />
+			<UpdateBar />
+			<TabBar />
 			<Toaster />
 		</div>
 	);
@@ -240,11 +268,14 @@ function App(): JSX.Element {
 		[logoStyle],
 	);
 
-	// Sync theme class to <html>. Only persist to localStorage if the user
+	// Sync theme class and status bar color to <html>. Only persist to localStorage if the user
 	// explicitly toggled (not auto-detected from system preference), so that
 	// subsequent visits re-check the OS preference.
 	useEffect(() => {
 		document.documentElement.classList.toggle("dark", theme === "dark");
+		for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+			meta.setAttribute("content", THEME_BG[theme]);
+		}
 		if (hasExplicitChoice.current) {
 			localStorage.setItem("khazna-theme", theme);
 		}
@@ -418,6 +449,7 @@ function App(): JSX.Element {
 					<Route path="/apps/:bankId" element={<AppDetailPage />} />
 					<Route path="/contributing" element={<ContributingPage />} />
 					<Route path="/about" element={<AboutPage />} />
+					<Route path="/settings" element={<SettingsPage />} />
 				</Routes>
 			</Layout>
 		</UIContext.Provider>

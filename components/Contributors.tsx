@@ -35,7 +35,7 @@ export function Contributors(): JSX.Element {
 	}, []);
 
 	return (
-		<section className=" border-t border-border/50 relative overflow-hidden">
+		<section className=" border-t border-border/50 relative overflow-hidden standalone:hidden">
 			<div className="absolute inset-0 bg-gradient-to-b from-transparent to-elevated/50 pointer-events-none" />
 
 			<div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

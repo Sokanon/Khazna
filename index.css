@@ -10,6 +10,8 @@
 }
 
 @custom-variant dark (&:is(.dark *));
+/* The installed app (class set before first paint in index.html) */
+@custom-variant standalone (&:where(.is-standalone, .is-standalone *));
 
 /* Arabic: Ghroob as primary, Montserrat as Latin fallback */
 html[lang="ar"] {
@@ -200,8 +202,147 @@ html[lang="ar"] {
 	* {
 		@apply border-border outline-ring/50;
 	}
+	html {
+		-webkit-tap-highlight-color: transparent;
+	}
 	body {
 		@apply bg-background text-foreground;
+		/* Clear of the notch when a phone is turned sideways (viewport-fit=cover) */
+		padding-left: env(safe-area-inset-left);
+		padding-right: env(safe-area-inset-right);
+	}
+
+	/* No double-tap zoom on controls; pinch zoom still works in a browser tab */
+	:is(a, button, label, summary, [role="button"], [role="tab"]) {
+		touch-action: manipulation;
+	}
+
+	/* Touch screens get no hover styles, so a press shows instead */
+	@media (hover: none) and (pointer: coarse) {
+		:is(a, button, [role="button"], [role="tab"]):not(:disabled):active {
+			opacity: 0.7;
+		}
+	}
+
+	/* In the installed app, a long press on a control shouldn't select its text or open a link preview */
+	.is-standalone :is(a, button, label, summary, [role="button"], [role="tab"], img) {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	/* For a moment the page is taller than the screen, so iOS gives back a view it left short
+	   (lib/viewport.ts) */
+	.vv-room body {
+		min-height: calc(100dvh + 50vh);
+	}
+
+	/* Height of the installed app's bottom tab bar on phone-sized screens (components/TabBar.tsx).
+	   Anything scrolled into view (focus, find) stops above it rather than under it. */
+	@media (width < 48rem) {
+		.is-standalone {
+			--tab-bar-h: 3.5rem;
+			scroll-padding-bottom: calc(var(--tab-bar-h) + env(safe-area-inset-bottom));
+		}
+	}
+}
+
+/* ─── Launch animation (installed app, once per launch) ─── */
+
+/* Starts exactly where iOS's static launch image leaves off (same mark, size and colours),
+   turns the ring like a vault dial, clicks the diamond, then opens into the app. */
+#splash {
+	display: none;
+}
+
+.splash #splash {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	/* The whole screen's height (set in index.html on iOS), so its centre is the screen's */
+	height: var(--splash-screen-h, 100%);
+	z-index: 200;
+	display: grid;
+	place-items: center;
+	background: #ffffff;
+	color: #18181b;
+	animation: splash-out 300ms ease-in 900ms forwards;
+}
+
+@media (prefers-color-scheme: dark) {
+	.splash #splash {
+		background: #080808;
+		color: #ffffff;
+	}
+}
+
+#splash svg {
+	width: 36vw;
+	fill: currentColor;
+	overflow: visible;
+	animation: splash-zoom 300ms ease-in 900ms forwards;
+}
+
+/* Holds still for the first 250ms while iOS cross-fades its launch image into the page */
+.splash-ring {
+	transform-box: view-box;
+	transform-origin: 291.7px 284.5px;
+	animation: splash-dial 640ms cubic-bezier(0.45, 0, 0.25, 1) 250ms both;
+}
+
+.splash-diamond {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: splash-click 220ms ease-out 720ms both;
+}
+
+@keyframes splash-dial {
+	0% {
+		transform: rotate(0deg);
+	}
+	35% {
+		transform: rotate(40deg);
+	}
+	68% {
+		transform: rotate(-22deg);
+	}
+	88% {
+		transform: rotate(4deg);
+	}
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+@keyframes splash-click {
+	50% {
+		transform: scale(1.45);
+	}
+}
+
+@keyframes splash-zoom {
+	to {
+		transform: scale(1.18);
+		opacity: 0;
+	}
+}
+
+@keyframes splash-out {
+	to {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.splash-ring,
+	.splash-diamond,
+	#splash svg {
+		animation: none;
+	}
+	.splash #splash {
+		animation-delay: 150ms;
+		animation-duration: 200ms;
 	}
 }
 

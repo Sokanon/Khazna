@@ -1,4 +1,15 @@
-import { Figma, Github, LayoutGrid, Mail, Menu, Search, Smartphone, X } from "lucide-react";
+import {
+	Download,
+	Figma,
+	Github,
+	LayoutGrid,
+	Mail,
+	Menu,
+	MonitorDown,
+	Search,
+	Smartphone,
+	X,
+} from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,8 +17,11 @@ import { Link, useLocation } from "react-router-dom";
 import { SOCIAL_LINKS } from "../constants";
 import { useContribute } from "../hooks/useContribute";
 import { useLanguage } from "../hooks/useLanguage";
+import { usePwa } from "../hooks/usePwa";
 import { useSound } from "../hooks/useSound";
 import { useUIContext } from "../hooks/useUIContext";
+import { canInstall, startInstall } from "../lib/pwa";
+import { cn } from "../lib/utils";
 import { SoundToggle } from "./SoundToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -18,6 +32,8 @@ export function Navbar(): JSX.Element {
 	const location = useLocation();
 	const contribute = useContribute();
 	const { openSearch } = useUIContext();
+	const pwa = usePwa();
+	const showInstall = canInstall(pwa);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	const isAppsPage = location.pathname.includes("/apps");
@@ -94,6 +110,21 @@ export function Navbar(): JSX.Element {
 							</kbd>
 						</span>
 					</button>
+					{showInstall && (
+						<button
+							type="button"
+							onClick={() => {
+								play("tap");
+								startInstall("navbar");
+							}}
+							aria-label={t("pwa.installApp")}
+							title={t("pwa.installApp")}
+							// Narrower, it would push the nav links onto two lines; the footer has it there.
+							className="hidden min-[1366px]:block p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-full transition-colors"
+						>
+							<MonitorDown size={20} />
+						</button>
+					)}
 					<a
 						href={SOCIAL_LINKS.github}
 						target="_blank"
@@ -140,8 +171,24 @@ export function Navbar(): JSX.Element {
 					</button>
 				</div>
 
+				{/* In the installed app the rest lives in the tab bar and Settings, so search stands alone */}
+				{pwa.standalone && (
+					<button
+						type="button"
+						onClick={() => {
+							play("tap");
+							openSearch();
+						}}
+						aria-label={t("search.open")}
+						className="md:hidden flex min-w-0 max-w-60 flex-1 items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-sm text-muted-foreground"
+					>
+						<Search size={16} className="shrink-0" />
+						<span className="truncate">{t("search.placeholder")}</span>
+					</button>
+				)}
+
 				{/* Mobile Menu Toggle */}
-				<div className="md:hidden flex items-center gap-2">
+				<div className={cn("md:hidden flex items-center gap-2", pwa.standalone && "hidden")}>
 					<SoundToggle />
 					<ThemeToggle />
 					<button
@@ -184,7 +231,7 @@ export function Navbar(): JSX.Element {
 
 			{/* Mobile Menu Dropdown */}
 			{isMobileMenuOpen && (
-				<div className="md:hidden border-t border-border bg-background absolute start-0 end-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto px-4 py-6 flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200 shadow-2xl">
+				<div className="md:hidden border-t border-border bg-background absolute start-0 end-0 top-16 h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200 shadow-2xl">
 					{/* Mobile Nav Links */}
 					<nav id="mobile-navigation" className="flex flex-col gap-2">
 						<Link
@@ -248,6 +295,21 @@ export function Navbar(): JSX.Element {
 								</a>
 							</div>
 						</div>
+
+						{showInstall && (
+							<button
+								type="button"
+								onClick={() => {
+									play("tap");
+									handleMobileNav();
+									startInstall("menu");
+								}}
+								className="flex items-center justify-center gap-2 w-full px-4 py-4 bg-surface border border-border text-primary text-base font-bold rounded-xl mt-2"
+							>
+								<Download size={18} />
+								{t("pwa.installApp")}
+							</button>
+						)}
 
 						<button
 							type="button"

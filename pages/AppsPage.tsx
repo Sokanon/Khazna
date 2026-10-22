@@ -1,20 +1,35 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Landmark } from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/Badge";
+import { FallbackImage, ScreenPlaceholder } from "../components/FallbackImage";
 import { BANKS, MOCK_SCREENSHOTS } from "../constants";
+import { useLanguage } from "../hooks/useLanguage";
 import { useSound } from "../hooks/useSound";
+import { useSwipe } from "../hooks/useSwipe";
 import type { Bank } from "../types";
 
 function AppCard({ app }: { app: Bank }): JSX.Element {
 	const { t } = useTranslation();
 	const play = useSound();
+	const { isRTL } = useLanguage();
 	const screenshots = MOCK_SCREENSHOTS[app.id] || [];
 	const screenCount = screenshots.length;
 	const hasScreens = screenCount > 0;
 	const [currentSlide, setCurrentSlide] = useState(0);
+	// The arrows only show on hover, so on touch screens the slides follow a swipe instead.
+	const swipe = useSwipe({
+		axis: "x",
+		distance: 40,
+		onSwipe: (direction) => {
+			if (screenCount < 2) return;
+			play("swipe");
+			const step = direction === (isRTL ? "right" : "left") ? 1 : -1;
+			setCurrentSlide((prev) => (prev + step + screenCount) % screenCount);
+		},
+	});
 
 	function nextSlide(e: React.MouseEvent): void {
 		e.preventDefault();
@@ -37,15 +52,22 @@ function AppCard({ app }: { app: Bank }): JSX.Element {
 			className="group flex flex-col gap-3"
 		>
 			{/* Card Preview Container */}
-			<div className="relative aspect-9/19 w-full bg-surface border border-border rounded-3xl overflow-hidden group-hover:border-border-subtle transition-all duration-300 shadow-sm hover:shadow-md">
+			<div
+				{...swipe.handlers}
+				className="relative aspect-9/19 w-full bg-surface border border-border rounded-3xl overflow-hidden group-hover:border-border-subtle transition-all duration-300 shadow-sm hover:shadow-md touch-pan-y touch-pinch-zoom"
+			>
 				{hasScreens ? (
 					<div className="w-full h-full relative bg-surface">
 						<div className="absolute inset-0 transition-opacity duration-300">
-							<img
+							<FallbackImage
 								src={screenshots[currentSlide].url}
 								alt={`${t(`entityNames.${app.id}`)} ${currentSlide + 1}`}
 								className="w-full h-full object-cover"
+								loadingClassName="bg-surface-hover motion-safe:animate-pulse"
 								loading="lazy"
+								fallback={
+									<ScreenPlaceholder label={`${t(`entityNames.${app.id}`)} ${currentSlide + 1}`} />
+								}
 							/>
 						</div>
 
@@ -67,7 +89,7 @@ function AppCard({ app }: { app: Bank }): JSX.Element {
 								</button>
 
 								{/* Dots Indicator */}
-								<div className="absolute bottom-3 start-0 end-0 z-20 flex justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+								<div className="absolute bottom-3 start-0 end-0 z-20 flex justify-center gap-1.5 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity">
 									{screenshots.slice(0, 5).map((screen, idx) => (
 										<div
 											key={screen.id}
@@ -101,10 +123,15 @@ function AppCard({ app }: { app: Bank }): JSX.Element {
 			{/* Meta Info */}
 			<div className="flex items-center gap-3 px-1">
 				<div className="rounded-xl bg-surface border border-border overflow-hidden flex-shrink-0 p-2">
-					<img
+					<FallbackImage
 						src={app.logomarkUrl || app.logoUrl}
 						alt={t(`entityNames.${app.id}`)}
 						className="w-8 h-8 object-contain"
+						fallback={
+							<span className="flex w-8 h-8 items-center justify-center text-muted-subtle">
+								<Landmark size={16} />
+							</span>
+						}
 					/>
 				</div>
 				<div className="flex flex-col">
