@@ -220,6 +220,8 @@ Add the display name to **both** translation files if the name differs between l
 - `data/en.json`
 - `data/ar.json`
 
+New logos are included in the next publish of the `@khazna/logos` npm package. After adding one, run `bun run logos:build` from the root, then `bun run test` in `packages/logos`, to check that the package still builds.
+
 ### 5. Verify
 
 ```bash

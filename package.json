@@ -10,7 +10,8 @@
 		"check": "biome check . && tsc --noEmit",
 		"format": "biome check --write .",
 		"screenshots": "bun scripts/screenshots.ts",
-		"logos:optimize": "bun scripts/optimize-logos.ts"
+		"logos:optimize": "bun scripts/optimize-logos.ts",
+		"logos:build": "bun packages/logos/scripts/build.ts"
 	},
 	"dependencies": {
 		"@radix-ui/react-tabs": "^1.1.13",
