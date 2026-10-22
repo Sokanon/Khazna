@@ -74,7 +74,7 @@ export function Community(): JSX.Element {
 	const { t } = useTranslation();
 
 	return (
-		<section className="border-t border-border/50 px-4 py-16 text-center sm:px-6 lg:px-8">
+		<section className="border-t border-border/50 px-4 py-16 text-center sm:px-6 lg:px-8 standalone:hidden">
 			<h2 className="text-2xl font-bold text-primary md:text-3xl">
 				{t("contributors.communityTitle")}
 			</h2>
